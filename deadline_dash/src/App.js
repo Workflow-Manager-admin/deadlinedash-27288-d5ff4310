@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import './App.css';
 import DeadlineCard from './DeadlineCard';
+import DeadlineForm from './DeadlineForm';
 
 /**
  * Deadline object structure:
