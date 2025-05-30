@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import './App.css';
+import DeadlineCard from './DeadlineCard';
 
 /**
  * Deadline object structure:
@@ -132,7 +133,29 @@ function App() {
             </div>
           ) : (
             <div>
-              {/* Render deadlines here in future (will be mapped as cards) */}
+              {/* Map deadlines as cards, sorted by dueDate ascending */}
+              {deadlines
+                .slice()
+                .sort(
+                  (a, b) =>
+                    new Date(a.dueDate).getTime() -
+                    new Date(b.dueDate).getTime()
+                )
+                .map((deadline) => (
+                  <DeadlineCard
+                    key={deadline.id}
+                    title={deadline.title}
+                    dueDate={deadline.dueDate}
+                    note={deadline.note}
+                    onEdit={() => {
+                      // TODO: Implement edit modal
+                      alert(
+                        `Edit functionality coming soon (would edit: ${deadline.title})`
+                      );
+                    }}
+                    onDelete={() => deleteDeadline(deadline.id)}
+                  />
+                ))}
             </div>
           )}
         </div>
