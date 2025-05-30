@@ -77,6 +77,49 @@ function App() {
     setDeadlines(prev => prev.filter(deadline => deadline.id !== id));
   }
 
+  // State for controlling DeadlineForm modal type and data
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalMode, setModalMode] = useState("add"); // "add" or "edit"
+  const [modalInitial, setModalInitial] = useState(null); // if editing: { id, title, dueDate, note }
+  const [editId, setEditId] = useState(null);
+
+  // Handle Add FAB button click
+  function openAddModal() {
+    setModalMode("add");
+    setModalInitial(null);
+    setModalOpen(true);
+    setEditId(null);
+  }
+
+  // Handle Edit button click on DeadlineCard
+  function openEditModal(deadline) {
+    setModalMode("edit");
+    setModalInitial({
+      title: deadline.title,
+      dueDate: deadline.dueDate,
+      note: deadline.note ?? ""
+    });
+    setEditId(deadline.id);
+    setModalOpen(true);
+  }
+
+  // Handler for Modal form submit
+  function handleModalSubmit(data) {
+    if (modalMode === "add") {
+      addDeadline(data);
+    } else if (modalMode === "edit" && editId) {
+      editDeadline(editId, data);
+    }
+    setModalOpen(false);
+    setEditId(null);
+  }
+
+  // Handler for closing Modal (cancel or submit)
+  function handleModalClose() {
+    setModalOpen(false);
+    setEditId(null);
+  }
+
   return (
     <div className="app">
       {/* Top navigation bar */}
@@ -112,8 +155,6 @@ function App() {
         aria-label="List of deadlines"
       >
         <div className="container">
-          {/* Deadline list will eventually be rendered here.
-              For now, show empty state. */}
           {deadlines.length === 0 ? (
             <div
               style={{
@@ -148,12 +189,7 @@ function App() {
                     title={deadline.title}
                     dueDate={deadline.dueDate}
                     note={deadline.note}
-                    onEdit={() => {
-                      // TODO: Implement edit modal
-                      alert(
-                        `Edit functionality coming soon (would edit: ${deadline.title})`
-                      );
-                    }}
+                    onEdit={() => openEditModal(deadline)}
                     onDelete={() => deleteDeadline(deadline.id)}
                   />
                 ))}
@@ -161,6 +197,15 @@ function App() {
           )}
         </div>
       </main>
+
+      {/* Deadline Add/Edit Modal */}
+      <DeadlineForm
+        open={modalOpen}
+        mode={modalMode}
+        initialData={modalInitial}
+        onSubmit={handleModalSubmit}
+        onClose={handleModalClose}
+      />
 
       {/* Floating Action Button (FAB) */}
       <button
@@ -187,7 +232,7 @@ function App() {
           transition: 'box-shadow 0.2s, background 0.2s',
         }}
         tabIndex={0}
-        // onClick={() => { /* To be implemented: show add deadline modal */ }}
+        onClick={openAddModal}
       >
         +
       </button>
