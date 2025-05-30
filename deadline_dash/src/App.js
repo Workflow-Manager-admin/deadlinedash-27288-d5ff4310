@@ -1,8 +1,80 @@
-import React from 'react';
+import React, { useState, useRef } from 'react';
 import './App.css';
+
+/**
+ * Deadline object structure:
+ * {
+ *   id: string,          // Unique ID for each deadline
+ *   title: string,       // Title of the deadline
+ *   dueDate: string,     // Due date in ISO format (e.g., '2023-06-09')
+ *   note: string,        // Optional note for the deadline
+ * }
+ */
 
 // PUBLIC_INTERFACE
 function App() {
+  // State for deadlines, initialized as an empty array or with example data for development
+  const [deadlines, setDeadlines] = useState([
+    // Uncomment below to use initial sample data for development/demo
+    // {
+    //   id: '1',
+    //   title: 'Math Exam',
+    //   dueDate: '2024-07-04',
+    //   note: 'Room 101, bring calculator'
+    // },
+    // {
+    //   id: '2',
+    //   title: 'History Paper',
+    //   dueDate: '2024-07-10',
+    //   note: ''
+    // }
+  ]);
+
+  // Keep a ref for a monotonically increasing numeric ID counter to ensure unique IDs
+  const deadlineIdCounter = useRef(3);
+
+  // PUBLIC_INTERFACE
+  /**
+   * Adds a new deadline to the list.
+   * @param {Object} deadlineData - { title, dueDate, note }
+   */
+  function addDeadline(deadlineData) {
+    setDeadlines(prev => [
+      ...prev,
+      {
+        id: String(deadlineIdCounter.current++),
+        title: deadlineData.title,
+        dueDate: deadlineData.dueDate,
+        note: deadlineData.note || ''
+      }
+    ]);
+  }
+
+  // PUBLIC_INTERFACE
+  /**
+   * Edits an existing deadline by id.
+   * @param {string} id - Deadline ID
+   * @param {Object} updates - { title?, dueDate?, note? }
+   */
+  function editDeadline(id, updates) {
+    setDeadlines(prev =>
+      prev.map(deadline =>
+        deadline.id !== id
+          ? deadline
+          : { ...deadline, ...updates }
+      )
+    );
+  }
+
+  // PUBLIC_INTERFACE
+  /**
+   * Deletes a deadline by id.
+   * @param {string} id - Deadline ID
+   */
+  function deleteDeadline(id) {
+    setDeadlines(prev => prev.filter(deadline => deadline.id !== id));
+  }
+
   return (
     <div className="app">
       {/* Top navigation bar */}
@@ -40,23 +112,29 @@ function App() {
         <div className="container">
           {/* Deadline list will eventually be rendered here.
               For now, show empty state. */}
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              marginTop: 56,
-              color: 'var(--text-secondary)',
-              minHeight: 220,
-            }}
-          >
-            <div style={{ fontSize: '1.16rem', marginBottom: 8 }}>
-              <span role="img" aria-label="no deadlines">🎉</span> No deadlines yet
+          {deadlines.length === 0 ? (
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                marginTop: 56,
+                color: 'var(--text-secondary)',
+                minHeight: 220,
+              }}
+            >
+              <div style={{ fontSize: '1.16rem', marginBottom: 8 }}>
+                <span role="img" aria-label="no deadlines">🎉</span> No deadlines yet
+              </div>
+              <div style={{ fontSize: '0.98rem' }}>
+                Click the <span style={{ color: '#FFB300', fontWeight: 500 }}>+</span> button to add your first deadline.
+              </div>
             </div>
-            <div style={{ fontSize: '0.98rem' }}>
-              Click the <span style={{ color: '#FFB300', fontWeight: 500 }}>+</span> button to add your first deadline.
+          ) : (
+            <div>
+              {/* Render deadlines here in future (will be mapped as cards) */}
             </div>
-          </div>
+          )}
         </div>
       </main>
 
@@ -85,6 +163,7 @@ function App() {
           transition: 'box-shadow 0.2s, background 0.2s',
         }}
         tabIndex={0}
+        // onClick={() => { /* To be implemented: show add deadline modal */ }}
       >
         +
       </button>
