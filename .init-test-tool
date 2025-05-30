@@ -1,0 +1,4 @@
+{
+    "command": "npm run test",
+    "working_directory": "/home/kavia/workspace/code-generation/deadlinedash-27288-d5ff4310/deadline_dash"
+}
