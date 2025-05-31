@@ -21,6 +21,19 @@ body {
   flex-direction: column;
 }
 
+/* Calendar view grid overrides */
+.calendar-view-grid {
+  /* Responsive: shrink grid on mobile */
+  max-width: 100vw !important;
+  overflow-x: auto;
+  box-sizing: border-box;
+}
+@media (max-width: 700px) {
+  .calendar-view-grid {
+    font-size: 0.91rem;
+  }
+}
+
 .navbar {
   background-color: var(--kavia-dark);
   padding: 16px;

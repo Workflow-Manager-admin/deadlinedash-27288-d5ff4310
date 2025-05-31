@@ -87,6 +87,14 @@ function App() {
   const [modalMode, setModalMode] = useState("add"); // "add" or "edit"
   const [modalInitial, setModalInitial] = useState(null); // if editing: { id, title, dueDate, note }
   const [editId, setEditId] = useState(null);
+  // Calendar/List view state
+  const [viewMode, setViewMode] = useState('list'); // 'list' or 'calendar'
+  // When clicking deadline in calendar mode, show detail via modal edit
+  // ID of deadline to view/edit from calendar:
+  // Use App modal for details/edit as used for cards.
+  function handleCalendarDeadlineClick(dl) {
+    openEditModal(dl);
+  }
 
   // Handle Add FAB button click
   function openAddModal() {
@@ -130,6 +138,58 @@ function App() {
     editDeadline(id, { progress: newProgress });
   }
 
+  // UI: toggle between list and calendar
+  const viewToggle = (
+    <div
+      style={{
+        display: 'flex',
+        gap: 0,
+        alignItems: 'center',
+        margin: '24px 0 8px 0',
+        justifyContent: 'center'
+      }}
+      aria-label="Switch between list view and calendar view"
+    >
+      <button
+        tabIndex={0}
+        className="btn"
+        onClick={() => setViewMode('list')}
+        style={{
+          background: viewMode === 'list' ? 'var(--kavia-orange)' : 'rgba(255,235,200,0.08)',
+          color: viewMode === 'list' ? '#1A1A1A' : 'var(--text-color)',
+          border: `1px solid ${viewMode === 'list' ? 'var(--kavia-orange)' : 'var(--border-color)'}`,
+          borderRadius: '9px 0 0 9px',
+          fontWeight: 600,
+          fontSize: '1.07rem',
+          padding: '7px 18px',
+          cursor: 'pointer',
+          boxShadow: viewMode === 'list' ? '0 3px 8px rgba(234,153,64,0.09)' : undefined,
+          outline: 'none'
+        }}>
+        List View
+      </button>
+      <button
+        tabIndex={0}
+        className="btn"
+        onClick={() => setViewMode('calendar')}
+        style={{
+          background: viewMode === 'calendar' ? 'var(--kavia-orange)' : 'rgba(255,235,200,0.08)',
+          color: viewMode === 'calendar' ? '#1A1A1A' : 'var(--text-color)',
+          border: `1px solid ${viewMode === 'calendar' ? 'var(--kavia-orange)' : 'var(--border-color)'}`,
+          borderRadius: '0 9px 9px 0',
+          fontWeight: 600,
+          fontSize: '1.07rem',
+          padding: '7px 18px',
+          cursor: 'pointer',
+          boxShadow: viewMode === 'calendar' ? '0 3px 8px rgba(234,153,64,0.09)' : undefined,
+          outline: 'none',
+          borderLeft: '0px'
+        }}>
+        Calendar View
+      </button>
+    </div>
+  );
+
   return (
     <div className="app">
       {/* Top navigation bar */}
@@ -153,7 +213,6 @@ function App() {
         </div>
       </nav>
 
-      {/* Main list view area */}
       <main
         style={{
           flex: 1,
@@ -162,9 +221,10 @@ function App() {
           minHeight: '60vh',
           background: 'var(--kavia-dark)',
         }}
-        aria-label="List of deadlines"
+        aria-label={viewMode === 'calendar' ? 'Calendar of deadlines' : 'List of deadlines'}
       >
         <div className="container">
+          {viewToggle}
           {deadlines.length === 0 ? (
             <div
               style={{
@@ -184,34 +244,40 @@ function App() {
               </div>
             </div>
           ) : (
-            <div>
-              {/* Map deadlines as cards, sorted by dueDate ascending */}
-              {deadlines
-                .slice()
-                .sort(
-                  (a, b) =>
-                    new Date(a.dueDate).getTime() -
-                    new Date(b.dueDate).getTime()
-                )
-                .map((deadline) => (
-                  <DeadlineCard
-                    key={deadline.id}
-                    title={deadline.title}
-                    dueDate={deadline.dueDate}
-                    note={deadline.note}
-                    progress={typeof deadline.progress === 'number' ? deadline.progress : 0}
-                    onEdit={() => openEditModal(deadline)}
-                    onDelete={() => deleteDeadline(deadline.id)}
-                    onProgressChange={(newProgress) =>
-                      handleProgressUpdate(deadline.id, newProgress)
-                    }
-                  />
-                ))}
-            </div>
+            viewMode === 'calendar' ? (
+              <CalendarView
+                deadlines={deadlines}
+                onDeadlineClick={handleCalendarDeadlineClick}
+              />
+            ) : (
+              <div>
+                {/* Map deadlines as cards, sorted by dueDate ascending */}
+                {deadlines
+                  .slice()
+                  .sort(
+                    (a, b) =>
+                      new Date(a.dueDate).getTime() -
+                      new Date(b.dueDate).getTime()
+                  )
+                  .map((deadline) => (
+                    <DeadlineCard
+                      key={deadline.id}
+                      title={deadline.title}
+                      dueDate={deadline.dueDate}
+                      note={deadline.note}
+                      progress={typeof deadline.progress === 'number' ? deadline.progress : 0}
+                      onEdit={() => openEditModal(deadline)}
+                      onDelete={() => deleteDeadline(deadline.id)}
+                      onProgressChange={(newProgress) =>
+                        handleProgressUpdate(deadline.id, newProgress)
+                      }
+                    />
+                  ))}
+              </div>
+            )
           )}
         </div>
       </main>
-
       {/* Deadline Add/Edit Modal */}
       <DeadlineForm
         open={modalOpen}
