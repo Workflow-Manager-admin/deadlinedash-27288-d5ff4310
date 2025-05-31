@@ -22,13 +22,15 @@ function App() {
     //   id: '1',
     //   title: 'Math Exam',
     //   dueDate: '2024-07-04',
-    //   note: 'Room 101, bring calculator'
+    //   note: 'Room 101, bring calculator',
+    //   progress: 30 // Example: 30% complete
     // },
     // {
     //   id: '2',
     //   title: 'History Paper',
     //   dueDate: '2024-07-10',
-    //   note: ''
+    //   note: '',
+    //   progress: 50
     // }
   ]);
 
