@@ -191,8 +191,12 @@ function App() {
                     title={deadline.title}
                     dueDate={deadline.dueDate}
                     note={deadline.note}
+                    progress={typeof deadline.progress === 'number' ? deadline.progress : 0}
                     onEdit={() => openEditModal(deadline)}
                     onDelete={() => deleteDeadline(deadline.id)}
+                    onProgressChange={(newProgress) =>
+                      editDeadline(deadline.id, { progress: newProgress })
+                    }
                   />
                 ))}
             </div>

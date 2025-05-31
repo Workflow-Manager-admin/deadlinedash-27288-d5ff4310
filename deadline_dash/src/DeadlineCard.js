@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
  */
 
 // PUBLIC_INTERFACE
-function DeadlineCard({ title, dueDate, note, onEdit, onDelete }) {
+function DeadlineCard({ title, dueDate, note, progress = 0, onEdit, onDelete, onProgressChange }) {
   // State: days left, auto-recomputed at least daily
   const [daysLeft, setDaysLeft] = useState(() => calculateDaysLeft(dueDate));
 
