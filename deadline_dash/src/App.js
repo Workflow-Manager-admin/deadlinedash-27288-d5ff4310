@@ -138,6 +138,36 @@ function App() {
     editDeadline(id, { progress: newProgress });
   }
 
+  // --- Search logic state ---
+  const [searchQuery, setSearchQuery] = useState("");
+
+  // Returns true if a deadline matches the query (case-insensitive; searches title, note, dueDate)
+  function isDeadlineMatch(deadline, query) {
+    if (!query.trim()) return true;
+    const q = query.trim().toLowerCase();
+    if (deadline.title && deadline.title.toLowerCase().includes(q)) return true;
+    if (deadline.note && deadline.note.toLowerCase().includes(q)) return true;
+    if (deadline.dueDate && deadline.dueDate.includes(q)) return true;
+    // Optionally match against human-readable due date
+    if (formatDueDate(deadline.dueDate).toLowerCase().includes(q)) return true;
+    return false;
+  }
+
+  // Utility: Format ISO date to human-readable string ("Thu, Jul 04, 2024")
+  function formatDueDate(dueDateStr) {
+    const d = new Date(dueDateStr);
+    if (isNaN(d)) return dueDateStr || "";
+    return d.toLocaleDateString(undefined, {
+      weekday: 'short',
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric'
+    });
+  }
+
+  // Filter deadlines using search query
+  const filteredDeadlines = deadlines.filter(dl => isDeadlineMatch(dl, searchQuery));
+
   // UI: toggle between list and calendar
   const viewToggle = (
     <div
@@ -190,6 +220,68 @@ function App() {
     </div>
   );
 
+  // --- Search input bar, styled for dark theme ---
+  const searchBar = (
+    <div
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 10,
+        background: 'rgba(27,27,33,0.93)',
+        borderRadius: 8,
+        border: '1.4px solid var(--border-color)',
+        padding: '7px 14px',
+        marginTop: 28,
+        marginBottom: 18,
+        boxShadow: '0 2px 6px rgba(20,20,25,0.08)',
+        maxWidth: 420,
+        width: '100%'
+      }}
+    >
+      <span
+        role="img"
+        aria-label="Search"
+        style={{ fontSize: 19, color: 'var(--kavia-orange)' }}
+      >🔍</span>
+      <input
+        type="text"
+        value={searchQuery}
+        onChange={e => setSearchQuery(e.target.value)}
+        placeholder="Search deadlines (title, note, date)…"
+        aria-label="Search deadlines"
+        style={{
+          background: 'transparent',
+          border: 'none',
+          outline: 'none',
+          fontSize: '1.08rem',
+          color: 'var(--text-color)',
+          fontWeight: 500,
+          width: '100%',
+        }}
+      />
+      {searchQuery &&
+        <button
+          style={{
+            background: 'none',
+            border: 'none',
+            color: 'var(--text-secondary)',
+            fontSize: 22,
+            cursor: 'pointer',
+            marginLeft: 2,
+            outline: 'none',
+          }}
+          aria-label="Clear search"
+          onClick={() => setSearchQuery('')}
+        >×</button>
+      }
+    </div>
+  );
+
+  // In calendar view: optionally highlight/filter cells that contain matching deadlines.
+  // Show only deadlines matching the query on the calendar.
+  // We'll pass filteredDeadlines for "search applied" and all for blank search.
+  const calendarDeadlines = searchQuery.trim() ? filteredDeadlines : deadlines;
+
   return (
     <div className="app">
       {/* Top navigation bar */}
@@ -225,6 +317,7 @@ function App() {
       >
         <div className="container">
           {viewToggle}
+          {searchBar}
           {deadlines.length === 0 ? (
             <div
               style={{
@@ -246,33 +339,44 @@ function App() {
           ) : (
             viewMode === 'calendar' ? (
               <CalendarView
-                deadlines={deadlines}
+                deadlines={calendarDeadlines}
                 onDeadlineClick={handleCalendarDeadlineClick}
               />
             ) : (
               <div>
                 {/* Map deadlines as cards, sorted by dueDate ascending */}
-                {deadlines
-                  .slice()
-                  .sort(
-                    (a, b) =>
-                      new Date(a.dueDate).getTime() -
-                      new Date(b.dueDate).getTime()
-                  )
-                  .map((deadline) => (
-                    <DeadlineCard
-                      key={deadline.id}
-                      title={deadline.title}
-                      dueDate={deadline.dueDate}
-                      note={deadline.note}
-                      progress={typeof deadline.progress === 'number' ? deadline.progress : 0}
-                      onEdit={() => openEditModal(deadline)}
-                      onDelete={() => deleteDeadline(deadline.id)}
-                      onProgressChange={(newProgress) =>
-                        handleProgressUpdate(deadline.id, newProgress)
-                      }
-                    />
-                  ))}
+                {filteredDeadlines.length === 0 ? (
+                  <div style={{
+                    marginTop: 54,
+                    color: 'var(--text-secondary)',
+                    fontSize: '1.13rem',
+                    textAlign: 'center'
+                  }}>
+                    <span role="img" aria-label="no match">🔎</span> No matching deadlines found
+                  </div>
+                ) : (
+                  filteredDeadlines
+                    .slice()
+                    .sort(
+                      (a, b) =>
+                        new Date(a.dueDate).getTime() -
+                        new Date(b.dueDate).getTime()
+                    )
+                    .map((deadline) => (
+                      <DeadlineCard
+                        key={deadline.id}
+                        title={deadline.title}
+                        dueDate={deadline.dueDate}
+                        note={deadline.note}
+                        progress={typeof deadline.progress === 'number' ? deadline.progress : 0}
+                        onEdit={() => openEditModal(deadline)}
+                        onDelete={() => deleteDeadline(deadline.id)}
+                        onProgressChange={(newProgress) =>
+                          handleProgressUpdate(deadline.id, newProgress)
+                        }
+                      />
+                    ))
+                )}
               </div>
             )
           )}
