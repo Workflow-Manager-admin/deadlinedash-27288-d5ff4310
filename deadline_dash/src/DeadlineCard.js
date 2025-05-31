@@ -117,6 +117,72 @@ function DeadlineCard({ title, dueDate, note, progress = 0, onEdit, onDelete, on
           {note}
         </div>
       )}
+      {/* Progress Tracker */}
+      <div style={{ marginTop: 14, marginBottom: 4 }}>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 10,
+          marginBottom: 2
+        }}>
+          <span style={{
+            fontSize: '1.03rem',
+            color: 'var(--text-secondary)',
+            fontWeight: 500
+          }}>
+            Progress
+          </span>
+          <span
+            style={{
+              fontSize: '1rem',
+              color: 'var(--kavia-orange)',
+              fontWeight: 600,
+              marginLeft: 4
+            }}
+            aria-label={`Progress: ${progress}%`}
+          >
+            {progress}%
+          </span>
+        </div>
+        <div style={{
+          width: '100%',
+          background: 'rgba(255,255,255,0.10)',
+          borderRadius: 6,
+          height: 10,
+          marginBottom: 6
+        }}>
+          <div style={{
+            width: `${progress}%`,
+            height: 10,
+            background: 'linear-gradient(90deg, var(--kavia-orange), #FFD384 80%)',
+            borderRadius: 6,
+            transition: 'width 0.27s'
+          }} />
+        </div>
+        {/* Slider control: visually styled input */}
+        <input
+          type="range"
+          min={0}
+          max={100}
+          step={1}
+          value={progress}
+          aria-valuetext={`${progress}%`}
+          aria-label="Progress percentage"
+          onChange={e => {
+            if (onProgressChange) onProgressChange(Number(e.target.value));
+          }}
+          style={{
+            width: '95%',
+            accentColor: '#E87A41',
+            height: 3,
+            background: 'none',
+            marginTop: -4,
+            marginLeft: 2,
+            marginBottom: 8,
+            cursor: 'pointer'
+          }}
+        />
+      </div>
       <div style={{
         display: 'flex',
         gap: 10,
@@ -169,8 +235,10 @@ DeadlineCard.propTypes = {
   title: PropTypes.string.isRequired,
   dueDate: PropTypes.string.isRequired,
   note: PropTypes.string,
+  progress: PropTypes.number, // Percentage, 0-100
   onEdit: PropTypes.func.isRequired,
   onDelete: PropTypes.func.isRequired,
+  onProgressChange: PropTypes.func, // Handler for changing progress
 };
 
 // Utility: Calculate integer days left (round up if in future)
