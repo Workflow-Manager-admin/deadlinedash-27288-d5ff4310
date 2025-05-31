@@ -10,6 +10,7 @@ import DeadlineForm from './DeadlineForm';
  *   title: string,       // Title of the deadline
  *   dueDate: string,     // Due date in ISO format (e.g., '2023-06-09')
  *   note: string,        // Optional note for the deadline
+ *   progress: number,    // Percentage complete (0-100)
  * }
  */
 
@@ -17,13 +18,13 @@ import DeadlineForm from './DeadlineForm';
 function App() {
   // State for deadlines, initialized as an empty array or with example data for development
   const [deadlines, setDeadlines] = useState([
-    // Uncomment below to use initial sample data for development/demo
+    // Sample:
     // {
     //   id: '1',
     //   title: 'Math Exam',
     //   dueDate: '2024-07-04',
     //   note: 'Room 101, bring calculator',
-    //   progress: 30 // Example: 30% complete
+    //   progress: 30
     // },
     // {
     //   id: '2',
@@ -49,7 +50,8 @@ function App() {
         id: String(deadlineIdCounter.current++),
         title: deadlineData.title,
         dueDate: deadlineData.dueDate,
-        note: deadlineData.note || ''
+        note: deadlineData.note || '',
+        progress: 0 // Initialize progress for new deadlines
       }
     ]);
   }
@@ -58,7 +60,7 @@ function App() {
   /**
    * Edits an existing deadline by id.
    * @param {string} id - Deadline ID
-   * @param {Object} updates - { title?, dueDate?, note? }
+   * @param {Object} updates - { title?, dueDate?, note?, progress? }
    */
   function editDeadline(id, updates) {
     setDeadlines(prev =>
@@ -120,6 +122,11 @@ function App() {
   function handleModalClose() {
     setModalOpen(false);
     setEditId(null);
+  }
+
+  // Handler to update progress for a given deadline id
+  function handleProgressUpdate(id, newProgress) {
+    editDeadline(id, { progress: newProgress });
   }
 
   return (
@@ -195,7 +202,7 @@ function App() {
                     onEdit={() => openEditModal(deadline)}
                     onDelete={() => deleteDeadline(deadline.id)}
                     onProgressChange={(newProgress) =>
-                      editDeadline(deadline.id, { progress: newProgress })
+                      handleProgressUpdate(deadline.id, newProgress)
                     }
                   />
                 ))}
