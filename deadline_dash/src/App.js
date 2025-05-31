@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import './App.css';
 import DeadlineCard from './DeadlineCard';
 import DeadlineForm from './DeadlineForm';
+import CalendarView from './CalendarView';
 
 /**
  * Deadline object structure:
